@@ -6,12 +6,14 @@ module Test.Cardano.Api.Typed.Script
 
 import           Cardano.Api
 import           Cardano.Api.Shelley
+import qualified Cardano.Ledger.Alonzo.Data as Alonzo
 import           Cardano.Prelude
 import           Data.Aeson
 import           Gen.Cardano.Api.Typed
 import           Gen.Tasty.Hedgehog.Group (fromGroup)
 import           Hedgehog (Property, discover, (===))
 import           Hedgehog.Extras.Aeson
+import           Ouroboros.Consensus.Shelley.Eras (StandardAlonzo)
 import           Test.Tasty (TestTree)
 
 import qualified Hedgehog as H
@@ -125,6 +127,13 @@ prop_roundtrip_ScriptData =
   H.property $ do
     sData <- H.forAll genScriptData
     sData === fromAlonzoData (toAlonzoData sData)
+
+prop_roundtrip_ScriptDataHash :: Property
+prop_roundtrip_ScriptDataHash =
+  H.property $ do
+    sData <- H.forAll genScriptData
+    hashScriptData sData === ScriptDataHash (Alonzo.hashData (toAlonzoData sData :: Alonzo.Data StandardAlonzo))
+
 
 -- -----------------------------------------------------------------------------
 

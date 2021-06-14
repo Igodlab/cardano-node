@@ -42,6 +42,7 @@ test-suite cardano-api-test
                       , cardano-crypto-class
                       , cardano-crypto-test
                       , cardano-crypto-tests
+                      , cardano-ledger-alonzo
                       , cardano-ledger-core
                       , cardano-prelude
                       , cardano-slotting
