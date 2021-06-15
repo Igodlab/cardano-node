@@ -18,7 +18,7 @@ plutusscriptinuse=scripts/plutus/untyped-always-succeeds-txin.plutus
 
 export CARDANO_NODE_SOCKET_PATH=run/current/node-1/node.socket
 
-mkdir example/shelley/utxo-keys/
+mkdir -p example/shelley/utxo-keys/
 cp -f run/current/genesis/utxo-keys/utxo1.* example/shelley/utxo-keys/
 
 plutusscriptaddr=$(cardano-cli address build --payment-script-file $plutusscriptinuse  --testnet-magic 42 | grep -v Temporary)
