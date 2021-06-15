@@ -16,27 +16,31 @@ set -o pipefail
 # This is the end to end always succeeds plutus script example
 plutusscriptinuse=scripts/plutus/untyped-always-succeeds-txin.plutus
 
+export CARDANO_NODE_SOCKET_PATH=run/current/node-1/node.socket
 
-plutusscriptaddr=$(cardano-cli address build --payment-script-file $plutusscriptinuse  --testnet-magic 42)
+mkdir example/shelley/utxo-keys/
+cp -f run/current/genesis/utxo-keys/utxo1.* example/shelley/utxo-keys/
+
+plutusscriptaddr=$(cardano-cli address build --payment-script-file $plutusscriptinuse  --testnet-magic 42 | grep -v Temporary)
 
 mkdir -p example/work
 
 utxovkey=example/shelley/utxo-keys/utxo1.vkey
 utxoskey=example/shelley/utxo-keys/utxo1.skey
 
-utxoaddr=$(cardano-cli address build --testnet-magic 42 --payment-verification-key-file $utxovkey)
+utxoaddr=$(cardano-cli address build --testnet-magic 42 --payment-verification-key-file $utxovkey | grep -v Temporary)
 
-utxo=$(cardano-cli query utxo --address $utxoaddr --cardano-mode --testnet-magic 42 --out-file example/work/utxo.json)
+cardano-cli query utxo --address $utxoaddr --cardano-mode --testnet-magic 42 --out-file example/work/utxo.json
 
 txin=$(jq -r 'keys[]' example/work/utxo.json)
 
 cardano-cli transaction build-raw \
   --alonzo-era \
-  --fee 0 \
+  --fee 200000 \
   --tx-in $txin \
-  --tx-out $plutusscriptaddr+500000000 \
+  --tx-out $plutusscriptaddr+49999999900000 \
   --tx-out-datum-hash 9e1199a988ba72ffd6e9c269cadb3b53b5f360ff99f112d9b2ee30c4d74ad88b \
-  --tx-out $utxoaddr+500000000 \
+  --tx-out $utxoaddr+49999999900000 \
   --out-file example/work/create-datum-output.body
 
 cardano-cli transaction sign \
@@ -48,8 +52,8 @@ cardano-cli transaction sign \
 # SUBMIT
 cardano-cli transaction submit --tx-file example/work/create-datum-output.tx --testnet-magic 42
 
-echo "Pausing for 5 seconds..."
-sleep 5
+echo "Pausing for 15 seconds..."
+sleep 15
 
 # Step 2
 # After "locking" the tx output at the script address, we can now can attempt to spend
@@ -73,10 +77,10 @@ dummyaddress=addr_test1vpqgspvmh6m2m5pwangvdg499srfzre2dd96qq57nlnw6yctpasy4
 
 cardano-cli transaction build-raw \
   --alonzo-era \
-  --fee 400000000 \
+  --fee 500000000 \
   --tx-in $plutusutxotxin \
   --tx-in-collateral $txinCollateral \
-  --tx-out "$dummyaddress+100000000" \
+  --tx-out "$dummyaddress+49999499900000" \
   --tx-in-script-file $plutusscriptinuse \
   --tx-in-datum-value 42 \
   --protocol-params-file example/pparams.json\
